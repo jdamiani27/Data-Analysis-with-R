@@ -81,17 +81,18 @@ ggplot(data = diamonds, aes(x = carat)) +
 # Gapminder Data
 setwd("/Users/jasondamiani/Udacity/Data Analysis with R/problem_set3/")
 
-electricity <- read.csv("Electricity Generation.xls.csv", row.names = 1, as.is = TRUE, stringsAsFactors = FALSE)
-electricity <- data.frame(electricity[0], lapply(electricity, function(x) as.numeric(gsub(",", "", x))))
+electricity <- read.csv("Electricity Generation.xls.csv", as.is = TRUE, stringsAsFactors = FALSE)
+names(electricity)[1] <- "country"
+electricity <- data.frame(electricity[1], lapply(electricity[,2:20], function(x) as.numeric(gsub(",", "", x))))
 
-ggplot(data = electricity, aes(x = X2008)) +
+n <- electricity$country
+
+electricity_t = as.data.frame(t(electricity))
+colnames(electricity_t) <- n
+electricity_t <- electricity_t[-1, ]
+rownames <- lapply(row.names(electricity_t), function(x) gsub("X", "", x))
+electricity_t <- data.frame(lapply(electricity_t[,1:64], function(x) as.numeric(as.character(x))))
+row.names(electricity_t) <- rownames
+
+ggplot(data = electricity_t, aes(x = Ukraine)) +
   geom_histogram()
-
-electricity_t = t(electricity)
-electricity_t <- data.frame(lapply(electricity_t[0], function(x) as.numeric(gsub("X", "", x))), 
-                            electricity_t[1:])
-
-ggplot(data = electricity, aes(x = "2008", y = X2008)) +
-  geom_boxplot() +
-  coord_cartesian(ylim = c(0, 3e+11))
-
