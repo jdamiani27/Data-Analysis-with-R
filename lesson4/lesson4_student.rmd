@@ -113,7 +113,8 @@ pf.fc_by_age_chained <- pf %>% group_by(age) %>%
 Create your plot!
 
 ```{r Conditional Means Plot}
-
+ggplot(aes(x = age, y = friend_count_mean), data = pf.fc_by_age) + 
+  geom_line()
 ```
 
 ***
@@ -122,7 +123,20 @@ Create your plot!
 Notes:
 
 ```{r Overlaying Summaries with Raw Data}
-
+ggplot(aes(x = age, y = friendships_initiated), data = pf) +
+  coord_cartesian(xlim = c(13, 70), ylim = c(0, 1000)) +
+  geom_point(alpha = 1/20, 
+             position = position_jitter(h = 0),
+             color = "orange") +
+  geom_line(stat = "summary", fun.y = mean) +
+  geom_line(stat = "summary", fun.y = quantile, probs = 0.1,
+            linetype = 2,
+            color = "blue") +
+  geom_line(stat = "summary", fun.y = quantile, probs = 0.5,
+            color = "blue") +
+  geom_line(stat = "summary", fun.y = quantile, probs = 0.9,
+            linetype = 2,
+            color = "blue")
 ```
 
 #### What are some of your observations of the plot?
@@ -141,7 +155,7 @@ Notes:
 Notes:
 
 ```{r Correlation}
-
+cor.test(pf$age, pf$friend_count)
 ```
 
 Look up the documentation for the cor.test function.
@@ -155,7 +169,7 @@ Response:
 Notes:
 
 ```{r Correlation on Subsets}
-with(                 , cor.test(age, friend_count))
+with(pf[pf$age <= 70,], cor.test(age, friend_count))
 ```
 
 ***
@@ -169,7 +183,11 @@ Notes:
 Notes:
 
 ```{r}
-
+ggplot(aes(x = www_likes_received, y = likes_received), data = pf) +
+  geom_point(alpha = 0.05) +
+  coord_cartesian(xlim = c(0, quantile(pf$www_likes_received, 0.95)), 
+                  ylim = c(0, quantile(pf$likes_received, 0.95))) +
+  geom_smooth(method = "lm", color = "red")
 ```
 
 ***
@@ -178,13 +196,19 @@ Notes:
 Notes:
 
 ```{r Strong Correlations}
-
+ggplot(aes(x = www_likes_received, y = likes_received), data = pf) +
+  geom_point(alpha = 0.05) +
+  coord_cartesian(xlim = c(0, quantile(pf$www_likes_received, 0.95)), 
+                  ylim = c(0, quantile(pf$likes_received, 0.95))) +
+  geom_smooth(method = "lm", color = "red")
 ```
 
 What's the correlation betwen the two variables? Include the top 5% of values for the variable in the calculation and round to 3 decimal places.
 
 ```{r Correlation Calcuation}
-
+pf.subset = subset(pf, www_likes_received > quantile(www_likes_received, 0.95) & likes_received > quantile(likes_received, 0.95))
+cor.test(pf.subset$www_likes_received, pf.subset$likes_received)
+cor.test(pf$www_likes_received, pf$likes_received)
 ```
 
 Response:
@@ -202,12 +226,15 @@ Notes:
 ```{r More Caution With Correlation}
 install.packages('alr3')
 library(alr3)
+data(Mitchell)
+?Mitchell
 ```
 
 Create your plot!
 
 ```{r Temp vs Month}
-
+ggplot(aes(x = Month, y = Temp), data = Mitchell) +
+  geom_point()
 ```
 
 ***
@@ -215,11 +242,15 @@ Create your plot!
 ### Noisy Scatterplots
 a. Take a guess for the correlation coefficient for the scatterplot.
 
+0
+
 b. What is the actual correlation of the two variables?
 (Round to the thousandths place)
 
-```{r Noisy Scatterplots}
+0.05747063 
 
+```{r Noisy Scatterplots}
+cor.test(Mitchell$Month, Mitchell$Temp)
 ```
 
 ***
@@ -228,7 +259,9 @@ b. What is the actual correlation of the two variables?
 Notes:
 
 ```{r Making Sense of Data}
-
+ggplot(aes(x = Month, y = Temp), data = Mitchell) +
+  geom_point() +
+  scale_x_discrete(breaks = seq(0, 203, 12))
 ```
 
 ***
@@ -247,7 +280,7 @@ Notes:
 Notes:
 
 ```{r Understanding Noise: Age to Age Months}
-
+pf$age_with_months <- pf$age + (12 - pf$dob_month)/12
 ```
 
 ***
@@ -255,12 +288,19 @@ Notes:
 ### Age with Months Means
 
 ```{r Age with Months Means}
+pf.fc_by_age_months <- pf %>% group_by(age_with_months) %>% 
+                        summarise(friend_count_mean = mean(friend_count),
+                                  friend_count_median = median(friend_count),
+                                  n = n()) %>%
+                        arrange(age_with_months)
 
+head(pf.fc_by_age_months)
 ```
 
 Programming Assignment
 ```{r Programming Assignment}
-
+ggplot(aes(x = age_with_months, y = friend_count_mean), data = pf.fc_by_age_months[pf.fc_by_age_months$age_with_months < 71,]) +
+  geom_line()
 ```
 
 ***
