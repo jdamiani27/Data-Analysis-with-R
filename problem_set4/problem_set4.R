@@ -48,3 +48,38 @@ with(subset(diamonds, volume > 0 & volume < 800), cor.test(price, volume))
 ggplot(aes(x = volume, y = price), data = subset(diamonds, volume > 0 & volume < 800)) +
   geom_point(alpha = 0.01) +
   stat_smooth(method = "lm")
+
+# Mean Price by Clarity
+pf.fc_by_age_months <- pf %>% group_by(age_with_months) %>% 
+  summarise(friend_count_mean = mean(friend_count),
+            friend_count_median = median(friend_count),
+            n = n()) %>%
+  arrange(age_with_months)
+
+library(dplyr)
+
+diamondsByClarity <- diamonds %>% group_by(clarity) %>%
+  summarise(mean_price = mean(price),
+            median_price = median(as.numeric(price)),
+            min_price = min(price),
+            max_price = max(price),
+            n = n()) %>%
+  arrange(clarity)
+
+# Bar Charts of Mean Price
+diamonds_by_clarity <- group_by(diamonds, clarity)
+diamonds_mp_by_clarity <- summarise(diamonds_by_clarity, mean_price = mean(price))
+
+diamonds_by_color <- group_by(diamonds, color)
+diamonds_mp_by_color <- summarise(diamonds_by_color, mean_price = mean(price))
+
+library(gridExtra)
+
+p1 <- ggplot(aes(x = clarity, y = mean_price), data = diamonds_mp_by_clarity) +
+  geom_bar(stat = "identity")
+
+p2 <- ggplot(aes(x = color, y = mean_price), data = diamonds_mp_by_color) +
+  geom_bar(stat = "identity")
+
+grid.arrange(p1,p2)
+ 
