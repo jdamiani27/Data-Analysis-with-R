@@ -15,8 +15,15 @@ Notes:
 Notes:
 
 ```{r Third Qualitative Variable}
-ggplot(aes(x = gender, y = age),
-       data = subset(pf, !is.na(gender))) + geom_histogram()
+pf <- read.delim('pseudo_facebook.tsv')
+library(dplyr)
+
+pf.fc_by_age_gender <- pf %>%
+  filter(!is.na(gender)) %>%
+  group_by(age, gender) %>%
+  summarise(mean_friend_count = mean(friend_count),
+            median_friend_count = median(as.numeric(friend_count)),
+            n = n())
 ```
 
 ***
@@ -25,7 +32,7 @@ ggplot(aes(x = gender, y = age),
 Notes:
 
 ```{r Plotting Conditional Summaries}
-
+ggplot(aes(x = age, y = median_friend_count, color = gender), data = pf.fc_by_age_gender) + geom_line()
 ```
 
 ***
@@ -44,8 +51,10 @@ Notes:
 Notes:
 
 ```{r}
-install.packages('reshape2')
-library(reshape2)
+library(tidyr)
+
+pf.fc_by_age_gender.wide <- spread(subset(pf.fc_by_age_gender, select = c('gender', 'age', 'median_friend_count')), gender, median_friend_count) %>% 
+  mutate(ratio = female / male)
 ```
 
 
@@ -55,7 +64,8 @@ library(reshape2)
 Notes:
 
 ```{r Ratio Plot}
-
+ggplot(aes(x = age, y = ratio), data = pf.fc_by_age_gender.wide) +
+  geom_line() + geom_hline(yintercept = 1, linetype = 2)
 ```
 
 ***
